@@ -325,9 +325,6 @@ The raw report descriptor can be obtained on Windows with
 `DeviceIoControl(IOCTL_HID_GET_REPORT_DESCRIPTOR)` returns
 `ERROR_INVALID_FUNCTION` from user mode on this device.
 
-See [`docs/REVERSE_ENGINEERING.md`](docs/REVERSE_ENGINEERING.md) for the full
-walkthrough.
-
 ---
 
 ## How this was reverse engineered
@@ -346,7 +343,6 @@ Short version:
 7. Validate offline with `--replay` against the real capture before touching
    hardware again.
 
-Full write-up: [`docs/REVERSE_ENGINEERING.md`](docs/REVERSE_ENGINEERING.md).
 Protocol reference: [`docs/PROTOCOL.md`](docs/PROTOCOL.md).
 
 ---
