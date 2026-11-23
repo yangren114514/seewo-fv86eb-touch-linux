@@ -1,5 +1,5 @@
 /*
- * nbm-touchd - CVTE 1ff7:0f26 userspace touch driver
+ * seewo-touchd - CVTE 1ff7:0f26 userspace touch driver
  *
  * Reads 62-byte report ID 2 from /dev/hidrawN and injects standard
  * multi-touch events through /dev/uinput.
@@ -15,10 +15,10 @@
  *     +8..9 height uint16 LE
  *   byte 61     : contact count
  *
- * v2 additions (t39):
+ * Additional features:
  *   - HIDIOCSFEATURE(Report ID 3) sent right after opening hidraw, so the
  *     controller leaves "low rate" mode and reports at full speed.
- *     Value configurable: --feature-value N  or  NBM_TOUCH_FEATURE_VALUE.
+ *     Value configurable: --feature-value N  or  SEEWO_TOUCH_FEATURE_VALUE.
  *   - Reporting-rate diagnostics: every 10 s log how many frames arrived
  *     (and warn loudly when zero).
  *   - --probe   : no uinput; dump device, feature-report result, per-length
@@ -62,7 +62,7 @@
 #define HIDIOCSFEATURE(len) _IOC(_IOC_WRITE | _IOC_READ, 'H', 0x06, len)
 #endif
 
-#define LOG_PATH "/var/log/nbm-touchd.log"
+#define LOG_PATH "/var/log/seewo-touchd.log"
 #define LOG_MAX_BYTES (1024 * 1024)
 #define REPORT_ID 0x02
 #define REPORT_LEN 62
@@ -262,7 +262,7 @@ static int open_uinput(void)
     }
 
     memset(&udev, 0, sizeof(udev));
-    snprintf(udev.name, sizeof(udev.name), "NBM Virtual Touchscreen");
+    snprintf(udev.name, sizeof(udev.name), "Seewo FV86EB Touchscreen");
     udev.id.bustype = BUS_USB;
     udev.id.vendor = VID;
     udev.id.product = PID;
@@ -296,7 +296,7 @@ static int open_uinput(void)
     }
 
     usleep(200000);
-    log_msg("uinput device created: NBM Virtual Touchscreen");
+    log_msg("uinput device created: Seewo FV86EB Touchscreen");
     return fd;
 }
 
@@ -655,7 +655,7 @@ static void usage(const char *prog)
     printf("  --replay-delay-ms N      delay between replayed frames (default 3)\n");
     printf("  --feature-value N        feature report 3 value (0..255, default 10)\n");
     printf("  --help                   this text\n");
-    printf("\nEnvironment: NBM_TOUCH_FEATURE_VALUE overrides the default feature value.\n");
+    printf("\nEnvironment: SEEWO_TOUCH_FEATURE_VALUE overrides the default feature value.\n");
 }
 
 int main(int argc, char **argv)
@@ -692,7 +692,7 @@ int main(int argc, char **argv)
     }
     else
     {
-        const char *env = getenv("NBM_TOUCH_FEATURE_VALUE");
+        const char *env = getenv("SEEWO_TOUCH_FEATURE_VALUE");
         if (env != NULL && env[0] != '\0')
         {
             g_feature_value = atoi(env) & 0xFF;
@@ -712,18 +712,18 @@ int main(int argc, char **argv)
 
     if (want_probe)
     {
-        log_msg("nbm-touchd probe mode (feature=0x%02X source=%s, %ds)",
+        log_msg("seewo-touchd probe mode (feature=0x%02X source=%s, %ds)",
                 g_feature_value, g_feature_source, probe_seconds);
         return probe_mode(probe_seconds);
     }
 
     if (replay_file != NULL)
     {
-        log_msg("nbm-touchd replay mode: file=%s delay=%dms", replay_file, replay_delay_ms);
+        log_msg("seewo-touchd replay mode: file=%s delay=%dms", replay_file, replay_delay_ms);
         return replay_mode(replay_file, replay_delay_ms);
     }
 
-    log_msg("nbm-touchd starting (debug=%d, feature=0x%02X source=%s)",
+    log_msg("seewo-touchd starting (debug=%d, feature=0x%02X source=%s)",
             g_debug, g_feature_value, g_feature_source);
 
     ufd = open_uinput();
@@ -834,7 +834,7 @@ int main(int argc, char **argv)
         sleep(1);
     }
 
-    log_msg("nbm-touchd stopping");
+    log_msg("seewo-touchd stopping");
     ioctl(ufd, UI_DEV_DESTROY);
     close(ufd);
     return 0;

@@ -1,4 +1,4 @@
-# nbm-touchd
+# seewo-touchd
 
 **Userspace Linux touch driver for the Seewo FV86EB interactive flat panel (CVTE `1ff7:0f26` HID touch controller).**
 
@@ -141,7 +141,7 @@ Direct mapping, no swap, no inversion.
 
 Report ID 3 (1 byte, `Usage 0x55 Contact Max`) must be written to the device.
 Without it the controller stays in a low-rate mode: observed **~0.36 reports/s**
-before, **~53 reports/s** after. `nbm-touchd` sends it immediately after opening
+before, **~53 reports/s** after. `seewo-touchd` sends it immediately after opening
 the hidraw node.
 
 ---
@@ -156,7 +156,7 @@ the hidraw node.
          │ read()
          ▼
 ┌──────────────────┐
-│   nbm-touchd     │  parse 6 finger records,
+│   seewo-touchd     │  parse 6 finger records,
 │                  │  map contact id -> MT slot
 └────────┬─────────┘
          │ write()
@@ -191,7 +191,7 @@ cd seewo-fv86eb-touch-linux
 make
 sudo make install
 sudo systemctl daemon-reload
-sudo systemctl enable --now nbm-touchd
+sudo systemctl enable --now seewo-touchd
 ```
 
 Requires `gcc` and kernel headers (`linux/uinput.h`, `linux/hidraw.h`).
@@ -199,8 +199,8 @@ Requires `gcc` and kernel headers (`linux/uinput.h`, `linux/hidraw.h`).
 Check it came up:
 
 ```bash
-systemctl status nbm-touchd
-journalctl -u nbm-touchd -n 30
+systemctl status seewo-touchd
+journalctl -u seewo-touchd -n 30
 ```
 
 Expected log lines:
@@ -208,7 +208,7 @@ Expected log lines:
 ```
 [info] found hidraw /dev/hidraw2 for 1ff7:0f26
 [info] sent feature report 3 = 0x0A (10)
-[info] uinput device created: "NBM Virtual Touchscreen"
+[info] uinput device created: "Seewo FV86EB Touchscreen"
 [info] rate: 512 frames in 10.0s (51.1 fps)
 ```
 
@@ -217,7 +217,7 @@ Expected log lines:
 ## Usage
 
 ```
-nbm-touchd [options]
+seewo-touchd [options]
 
   --debug                  verbose per-contact logging
   --probe                  probe the device, then exit
@@ -229,13 +229,13 @@ nbm-touchd [options]
   --help
 ```
 
-Environment variable `NBM_TOUCH_FEATURE_VALUE` sets the feature report value when
+Environment variable `SEEWO_TOUCH_FEATURE_VALUE` sets the feature report value when
 `--feature-value` is not given.
 
 ### `--probe` — the first thing to run on a new panel
 
 ```bash
-sudo nbm-touchd --probe
+sudo seewo-touchd --probe
 ```
 
 ```
@@ -251,9 +251,9 @@ sudo nbm-touchd --probe
 If the frame rate is low, try other feature values:
 
 ```bash
-sudo nbm-touchd --probe --feature-value 5
-sudo nbm-touchd --probe --feature-value 1
-sudo nbm-touchd --probe --feature-value 127
+sudo seewo-touchd --probe --feature-value 5
+sudo seewo-touchd --probe --feature-value 1
+sudo seewo-touchd --probe --feature-value 127
 ```
 
 ### `--replay` — offline validation
@@ -262,9 +262,9 @@ Replays a capture file produced by the Windows capture tool (see below) through
 the exact same parse + uinput path, without needing the hardware:
 
 ```bash
-sudo nbm-touchd --replay capture.txt
+sudo seewo-touchd --replay capture.txt
 # in another terminal
-sudo evtest        # pick "NBM Virtual Touchscreen"
+sudo evtest        # pick "Seewo FV86EB Touchscreen"
 ```
 
 This is useful for regression testing on a machine that does not have the panel.
@@ -275,10 +275,10 @@ This is useful for regression testing on a machine that does not have the panel.
 
 ```bash
 # the virtual device should appear as a touchscreen
-sudo libinput list-devices | grep -A8 -i 'NBM Virtual'
+sudo libinput list-devices | grep -A8 -i 'Seewo Virtual'
 
 # raw events
-sudo evtest                  # select "NBM Virtual Touchscreen"
+sudo evtest                  # select "Seewo FV86EB Touchscreen"
 
 # check that libinput classified it as touch, not touchpad
 sudo libinput debug-events
@@ -402,15 +402,15 @@ PARTICULAR PURPOSE.
 ```bash
 make
 sudo make install
-sudo systemctl enable --now nbm-touchd
+sudo systemctl enable --now seewo-touchd
 ```
 
 **排查**：
 
 ```bash
-sudo nbm-touchd --probe        # 看设备在不在、上报率多少
-sudo evtest                     # 选 "NBM Virtual Touchscreen" 看事件
-journalctl -u nbm-touchd -f     # 看日志（每 10 秒打印一次上报率）
+sudo seewo-touchd --probe        # 看设备在不在、上报率多少
+sudo evtest                     # 选 "Seewo FV86EB Touchscreen" 看事件
+journalctl -u seewo-touchd -f     # 看日志（每 10 秒打印一次上报率）
 ```
 
 **协议要点**：Report ID 2，62 字节，6 个手指记录 × 10 字节，

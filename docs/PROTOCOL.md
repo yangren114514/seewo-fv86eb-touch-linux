@@ -179,7 +179,7 @@ behaviour drastically:
 |---|---|---|
 | report rate while touching | ~0.36 /s | ~53 /s |
 
-`nbm-touchd` sends value `0x0A` (10) by default and re-sends it if no frames
+`seewo-touchd` sends value `0x0A` (10) by default and re-sends it if no frames
 arrive for 10 s. The descriptor allows values up to 128; if the default does not
 produce a good frame rate, try `--feature-value 5 / 1 / 127`.
 

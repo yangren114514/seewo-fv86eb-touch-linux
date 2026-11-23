@@ -6,7 +6,7 @@ After=multi-user.target
 [Service]
 Type=simple
 ExecStartPre=-/sbin/modprobe uinput
-ExecStart=/usr/local/sbin/nbm-touchd
+ExecStart=/usr/local/sbin/seewo-touchd
 Restart=always
 RestartSec=2
 
