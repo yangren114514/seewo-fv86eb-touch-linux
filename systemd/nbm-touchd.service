@@ -1,0 +1,14 @@
+[Unit]
+Description=CVTE 1ff7:0f26 userspace touch driver (Seewo FV86EB)
+Documentation=https://github.com/yangren114514/seewo-fv86eb-touch-linux
+After=multi-user.target
+
+[Service]
+Type=simple
+ExecStartPre=-/sbin/modprobe uinput
+ExecStart=/usr/local/sbin/nbm-touchd
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target

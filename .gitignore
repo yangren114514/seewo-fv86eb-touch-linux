@@ -1,0 +1,12 @@
+# build output
+nbm-touchd
+
+# editors
+*.swp
+*~
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
