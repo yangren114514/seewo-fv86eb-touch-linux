@@ -10,3 +10,6 @@ seewo-touchd
 # OS
 .DS_Store
 Thumbs.db
+
+# release build artifacts
+release/
